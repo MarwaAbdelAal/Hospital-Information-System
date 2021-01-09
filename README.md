@@ -15,3 +15,11 @@
 6. contact us forms for any complains or special request
 
 7. statistical analysis for the admin entry
+
+### PIP Dependencies
+
+- Install dependencies by naviging to the project directory and running:
+  ```
+    pip install -r requirements.txt
+  ```
+  This will install all of the required packages we selected within the requirements.txt file.
