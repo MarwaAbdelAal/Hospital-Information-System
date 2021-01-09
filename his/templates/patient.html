@@ -5,7 +5,7 @@
         <div class="media-body">
             <div class="article-metadata">
                 <a class="mr-2">{{ patient.email }}</a></br>
-                <a class="mr-2" href="#">Doctor: {{ patient.author.username }}</a>
+                <a class="mr-2" href="{{ url_for('doctor_patients', username=patient.author.username) }}">Doctor: {{ patient.author.username }}</a>
                 <small class="text-muted">{{ patient.mobile_number }}</small>
                 {% if patient.author == current_user %}
                     <div>

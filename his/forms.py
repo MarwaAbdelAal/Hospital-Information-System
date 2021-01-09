@@ -66,5 +66,6 @@ class ContactUsForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     mobile_number = StringField('Mobile Number', validators=[DataRequired(), Length(11)])
-    comment = TextAreaField('Comment', validators=[DataRequired()])
-    submit = SubmitField('Send')
+    subject = StringField('Subject', validators=[DataRequired()])
+    message = TextAreaField('Comment', validators=[DataRequired()])
+    submit = SubmitField('Send Message')

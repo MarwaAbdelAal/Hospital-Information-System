@@ -47,17 +47,31 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    {{ form.comment.label(class="form-control-label") }}
+                    {{ form.subject.label(class="form-control-label") }}
 
-                    {% if form.comment.errors %}
-                        {{ form.comment(class="form-control form-control-lg is-invalid") }}
+                    {% if form.subject.errors %}
+                        {{ form.subject(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
-                            {% for error in form.comment.errors %}
+                            {% for error in form.subject.errors %}
                                 <span>{{ error }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ form.comment(class="form-control form-control-lg") }}
+                        {{ form.subject(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.message.label(class="form-control-label") }}
+
+                    {% if form.message.errors %}
+                        {{ form.message(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.message.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.message(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
             </fieldset>

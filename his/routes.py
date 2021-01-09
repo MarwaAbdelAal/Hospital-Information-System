@@ -154,11 +154,25 @@ def delete_patient(patient_id):
     flash('Your patient has been deleted!', 'success')
     return redirect(url_for('patients'))
 
+@app.route("/doctor/<string:username>")
+def doctor_patients(username):
+    doctor = Doctor.query.filter_by(username=username).first_or_404()
+    patients = Patient.query.filter_by(author=doctor)
+    return render_template('doctor_patients.html', patients=patients, doctor=doctor)
+
+@app.route("/message")
+@login_required
+def message():
+    messages = ContactUs.query.all()
+    return render_template('messages.html', messages=messages)
 
 @app.route("/contact_us", methods=['GET', 'POST'])
 def contact_us():
     form = ContactUsForm()
     if form.validate_on_submit():
-        flash(f'Comment sent from {form.name.data}!', 'success')
+        comment = ContactUs(name=form.name.data, email=form.email.data, mobile_number=form.mobile_number.data, subject=form.subject.data, message=form.message.data)
+        db.session.add(comment)
+        db.session.commit()
+        flash(f'Message sent from {form.name.data}!', 'success')
         return redirect(url_for('home'))
     return render_template('contact_us.html', title='Contact Us', form=form)

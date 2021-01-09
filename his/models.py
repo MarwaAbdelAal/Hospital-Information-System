@@ -40,7 +40,8 @@ class ContactUs(db.Model):
     name = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     mobile_number = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.Text, nullable=False)
+    subject = db.Column(db.String(120), nullable=False)
+    message = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
-        return f"Comment('{self.name}', '{self.email}', '{self.mobile_number}', '{self.comment}')"
+        return f"Message('{self.name}', '{self.email}', '{self.mobile_number}', '{self.subject}', '{self.message}')"
