@@ -3,8 +3,8 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from his import app, db, bcrypt
-from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountForm, PatientForm
-from his.models import Doctor, Patient, ContactUs
+from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountForm
+from his.models import User, ContactUs
 from flask_login import login_user, current_user, logout_user, login_required
 
 
@@ -19,26 +19,46 @@ def about():
 
 @app.route("/doctors")
 def doctors():
-    doctors = Doctor.query.all()
+    doctors = User.query.filter_by(role='doctor')
     return render_template('doctors.html', doctors=doctors)
 
 @app.route("/patients")
 @login_required
 def patients():
-    patients = Patient.query.all()
+    patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
     return render_template('patients.html', patients=patients)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
+    """register for patients
+    """
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        doctor = Doctor(username=form.username.data, email=form.email.data, password=hashed_password, mobile_number=form.mobile_number.data, gender=form.gender.data, age=form.age.data)
-        db.session.add(doctor)
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password,
+        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='patient')
+        db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
+        flash('Your patient account has been created! You are now able to log in', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
+@app.route("/register_doctor", methods=['GET', 'POST'])
+def register_doctor():
+    """register for patients
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password,
+        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='doctor')
+        db.session.add(user)
+        db.session.commit()
+        flash('A new doctor has been added! You are now able to log in', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -49,9 +69,9 @@ def login():
         return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
-        doctor = Doctor.query.filter_by(email=form.email.data).first()
-        if doctor and bcrypt.check_password_hash(doctor.password, form.password.data):
-            login_user(doctor, remember=form.remember.data)
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
@@ -101,52 +121,17 @@ def account():
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
-@app.route("/patient/new", methods=['GET', 'POST'])
-@login_required
-def new_patient():
-    form = PatientForm()
-    if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        patient = Patient(username=form.username.data, email=form.email.data, password=hashed_password, mobile_number=form.mobile_number.data, gender=form.gender.data, age=form.age.data, author=current_user)
-        db.session.add(patient)
-        db.session.commit()
-        flash('Your patient has been added!', 'success')
-        return redirect(url_for('home'))
-    return render_template('new_patient.html', title='New Patient', form=form, legend='New Patient')
 
 @app.route("/patient/<int:patient_id>")
 def patient(patient_id):
-    patient = Patient.query.get_or_404(patient_id)
+    patient = User.query.filter_by(patient_id, role='patient').first_or_404()
     return render_template('patient.html', title=patient.username, patient=patient)
 
-@app.route("/patient/<int:patient_id>/update", methods=['GET', 'POST'])
-@login_required
-def update_patient(patient_id):
-    patient = Patient.query.get_or_404(patient_id)
-    if patient.author != current_user:
-        abort(403)
-    form = PatientForm()
-    if form.validate_on_submit():
-        patient.username = form.username.data
-        patient.email = form.email.data
-        patient.mobile_number = form.mobile_number.data
-        patient.gender = form.gender.data
-        patient.age = form.age.data
-        db.session.commit()
-        flash('Patient Info has been updated!', 'success')
-        return redirect(url_for('patient', patient_id=patient.id))
-    elif request.method == 'GET':
-        form.username.data = patient.username
-        form.email.data = patient.email
-        form.mobile_number.data = patient.mobile_number
-        form.gender.data = patient.gender
-        form.age.data = patient.age
-    return render_template('new_patient.html', title='Update Patient', form=form, legend='Update patient')
 
 @app.route("/patient/<int:patient_id>/delete", methods=['POST'])
 @login_required
 def delete_patient(patient_id):
-    patient = Patient.query.get_or_404(patient_id)
+    patient = User.query.get_or_404(patient_id)
     if patient.author != current_user:
         abort(403)
     db.session.delete(patient)
@@ -156,9 +141,8 @@ def delete_patient(patient_id):
 
 @app.route("/doctor/<string:username>")
 def doctor_patients(username):
-    doctor = Doctor.query.filter_by(username=username).first_or_404()
-    patients = Patient.query.filter_by(author=doctor)
-    return render_template('doctor_patients.html', patients=patients, doctor=doctor)
+    doctor = User.query.filter_by(username=username, role='doctor').first_or_404()
+    return render_template('doctor_patients.html', patients=doctor.patients, doctor=doctor)
 
 @app.route("/message")
 @login_required

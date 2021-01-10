@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from his.models import Doctor
+from his.models import User
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
@@ -16,12 +16,12 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
-        doctor = Doctor.query.filter_by(username=username.data).first()
+        doctor = User.query.filter_by(username=username.data).first()
         if doctor:
             raise ValidationError('That username is taken. Please choose a different one.')
 
     def validate_email(self, email):
-        doctor = Doctor.query.filter_by(email=email.data).first()
+        doctor = User.query.filter_by(email=email.data).first()
         if doctor:
             raise ValidationError('That email is taken. Please choose a different one.')
 
@@ -42,25 +42,15 @@ class UpdateAccountForm(FlaskForm):
 
     def validate_username(self, username):
         if username.data != current_user.username:
-            doctor = Doctor.query.filter_by(username=username.data).first()
+            doctor = User.query.filter_by(username=username.data).first()
             if doctor:
                 raise ValidationError('That username is taken. Please choose a different one.')
 
     def validate_email(self, email):
         if email.data != current_user.email:
-            doctor = Doctor.query.filter_by(email=email.data).first()
+            doctor = User.query.filter_by(email=email.data).first()
             if doctor:
                 raise ValidationError('That email is taken. Please choose a different one.')
-
-class PatientForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password',validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password',validators=[DataRequired(), EqualTo('password')])
-    mobile_number = StringField('Mobile Number', validators=[DataRequired(), Length(11)])
-    gender = StringField('Gender', validators=[DataRequired()])
-    age = StringField('Age', validators=[DataRequired()])
-    submit = SubmitField('Add Patient')
 
 class ContactUsForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=2, max=20)])

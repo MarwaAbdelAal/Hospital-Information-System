@@ -5,9 +5,9 @@
         <div class="media-body">
             <div class="article-metadata">
                 <a class="mr-2">{{ patient.email }}</a></br>
-                <a class="mr-2" href="{{ url_for('doctor_patients', username=patient.author.username) }}">Doctor: {{ patient.author.username }}</a>
+                <a class="mr-2" href="{{ url_for('doctor_patients', username=patient.username) }}">Doctor: {{ patient.username }}</a>
                 <small class="text-muted">{{ patient.mobile_number }}</small>
-                {% if patient.author == current_user %}
+                {% if patient.username == current_user %}
                     <div>
                         <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{{ url_for('update_patient', patient_id=patient.id) }}">Update</a>
                         <button type="button" class="btn btn-danger btn-sm m-1" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
