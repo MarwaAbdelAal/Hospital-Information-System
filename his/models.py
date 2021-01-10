@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from sqlalchemy.orm import backref
 from his import db, login_manager
 from flask_login import UserMixin
 
@@ -9,6 +11,7 @@ def load_user(user_id):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
+    national_id = db.Column(db.Integer, unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
@@ -21,7 +24,12 @@ class User(db.Model, UserMixin):
     doctor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     patients = db.relationship('User')
 
-    # appointments = db.relationship('Appointment', backref='users', lazy=True)
+    # medical history
+    medical_history = db.Column(db.Text, nullable=True)
+    # salary
+    salary = db.Column(db.Text, nullable=True)
+    # patient scans
+    scans = db.relationship('CTScan', backref='patient', lazy=True)
 
     def __repr__(self):
         return f"{self.role} ('{self.username}', '{self.email}', '{self.gender}', '{self.age}')"
@@ -36,6 +44,17 @@ class Appointment(db.Model):
         doctor = User.query.get(self.doctor_id)
         patient = User.query.get(self.patient_id)
         return f"Appointment between doctor: {doctor.username} and patient {patient.username} at {self.datetime.isoformat()}"
+
+class CTScan(db.model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_file = db.Column(db.String(20), nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self) -> str:
+        patient = User.query.get(self.id)
+        return f'Patient {patient.username} scan dated at {self.datetime.isoforamt()}, image at {self.image_file}'
+
 
 class ContactUs(db.Model):
     id = db.Column(db.Integer, primary_key=True)
