@@ -25,7 +25,10 @@ def doctors():
 @app.route("/patients")
 @login_required
 def patients():
-    patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
+    if current_user.role == 'doctor':
+        patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
+    elif current_user.role == 'admin':
+        patients = User.query.filter_by(role='patient')
     return render_template('patients.html', patients=patients)
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -46,10 +49,11 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 @app.route("/register_doctor", methods=['GET', 'POST'])
+@login_required
 def register_doctor():
-    """register for patients
+    """register for doctors
     """
-    if current_user.is_authenticated:
+    if current_user.role != 'admin':
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -58,8 +62,8 @@ def register_doctor():
         mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='doctor')
         db.session.add(user)
         db.session.commit()
-        flash('A new doctor has been added! You are now able to log in', 'success')
-        return redirect(url_for('login'))
+        flash('A new doctor has been added! He is now able to log in', 'success')
+        return redirect(url_for('doctors'))
     return render_template('register.html', title='Register', form=form)
 
 
@@ -123,9 +127,11 @@ def account():
 
 
 @app.route("/patient/<int:patient_id>")
+@login_required
 def patient(patient_id):
-    patient = User.query.filter_by(patient_id, role='patient').first_or_404()
-    return render_template('patient.html', title=patient.username, patient=patient)
+    patient = User.query.filter_by(id=patient_id, role='patient').first_or_404()
+    doctor = User.query.filter_by(id=patient.doctor_id, role='doctor').first_or_404()
+    return render_template('patient.html', title=patient.username, patient=patient, doctor=doctor)
 
 
 @app.route("/patient/<int:patient_id>/delete", methods=['POST'])
@@ -140,7 +146,9 @@ def delete_patient(patient_id):
     return redirect(url_for('patients'))
 
 @app.route("/doctor/<string:username>")
+@login_required
 def doctor_patients(username):
+    ########## Can't get patients of each doctor in doctor_patients ###########
     doctor = User.query.filter_by(username=username, role='doctor').first_or_404()
     return render_template('doctor_patients.html', patients=doctor.patients, doctor=doctor)
 

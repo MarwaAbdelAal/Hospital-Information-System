@@ -4,8 +4,8 @@
         <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + patient.image_file) }}">
         <div class="media-body">
             <div class="article-metadata">
-                <a class="mr-2">{{ patient.email }}</a></br>
-                <a class="mr-2" href="{{ url_for('doctor_patients', username=patient.username) }}">Doctor: {{ patient.username }}</a>
+                <i class="mr-2">{{ patient.email }}</i></br>
+                <a class="mr-2" href="{{ url_for('doctor_patients', username=patient.username) }}">Doctor: {{ doctor.username }}</a>
                 <small class="text-muted">{{ patient.mobile_number }}</small>
                 {% if patient.username == current_user %}
                     <div>

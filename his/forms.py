@@ -42,14 +42,14 @@ class UpdateAccountForm(FlaskForm):
 
     def validate_username(self, username):
         if username.data != current_user.username:
-            doctor = User.query.filter_by(username=username.data).first()
-            if doctor:
+            user = User.query.filter_by(username=username.data).first()
+            if user:
                 raise ValidationError('That username is taken. Please choose a different one.')
 
     def validate_email(self, email):
         if email.data != current_user.email:
-            doctor = User.query.filter_by(email=email.data).first()
-            if doctor:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
 
 class ContactUsForm(FlaskForm):
