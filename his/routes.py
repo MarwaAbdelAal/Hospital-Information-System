@@ -46,8 +46,9 @@ def register():
             picture_file = save_picture(form.picture.data)
 
         user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
-        password=hashed_password, mobile_number=form.mobile_number.data,
+        password=hashed_password, mobile_number=form.mobile_number.data, medical_history=form.medical_history.data,
         gender=form.gender.data, age=form.age.data, role='patient', image_file=picture_file)
+        ## move scans to /account
         scans = []
         if form.scans.data:
             for image in form.scans.data:
@@ -73,8 +74,8 @@ def register_doctor():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password,
-        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='doctor')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, national_id=form.national_id.data,
+        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, salary=form.salary.data, role='doctor')
         db.session.add(user)
         db.session.commit()
         flash('A new doctor has been added! He is now able to log in', 'success')
@@ -128,6 +129,9 @@ def account():
         current_user.mobile_number = form.mobile_number.data
         current_user.gender = form.gender.data
         current_user.age = form.age.data
+        current_user.national_id = form.national_id.data
+        current_user.medical_history = form.medical_history.data
+        current_user.salary = form.salary.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
@@ -137,6 +141,9 @@ def account():
         form.mobile_number.data = current_user.mobile_number
         form.gender.data = current_user.gender
         form.age.data = current_user.age
+        form.national_id.data = current_user.national_id
+        form.medical_history.data = current_user.medical_history
+        form.salary.data = current_user.salary
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 

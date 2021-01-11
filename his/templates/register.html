@@ -114,25 +114,22 @@
                         {{ form.age(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group">
-                    {{ form.picture.label() }}
-                    {{ form.picture(class="form-control-file") }}
-                    {% if form.picture.errors %}
-                    {% for error in form.picture.errors %}
-                    <span class="text-danger">{{ error }}</span></br>
-                    {% endfor %}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.scans.label() }}
-                    {{ form.scans(class="form-control-file") }}
-                    {% if form.scans.errors %}
-                    {% for error in form.scans.errors %}
-                    <span class="text-danger">{{ error }}</span></br>
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                {% if current_user.role == 'admin' %}
+                    <div class="form-group">
+                        {{ form.salary.label(class="form-control-label") }}
 
+                        {% if form.salary.errors %}
+                            {{ form.salary(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.salary.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.salary(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                {% endif %}
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}

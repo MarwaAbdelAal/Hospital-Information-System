@@ -13,11 +13,13 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password',validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password',validators=[DataRequired(), EqualTo('password')])
     mobile_number = StringField('Mobile Number', validators=[DataRequired(), Length(11)])
-    national_id = StringField('National ID Number', validators=[DataRequired(), Length(11)])
+    national_id = StringField('National ID Number', validators=[DataRequired(), Length(14)])
     gender = StringField('Gender', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
-    picture = FileField('Choose Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
-    scans = MultipleFileField('Upload your scans', validators=[FileAllowed(['jpg', 'png'])])
+    salary = StringField('Salary', validators=[DataRequired()])
+    picture = FileField('Choose Profile Picture', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    scans = MultipleFileField('Upload your scans', validators=[FileAllowed(['jpg', 'png', 'jpeg'])]) ## move to UpdateAccount
+    medical_history = TextAreaField('Medical History', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -29,6 +31,11 @@ class RegistrationForm(FlaskForm):
         doctor = User.query.filter_by(email=email.data).first()
         if doctor:
             raise ValidationError('That email is taken. Please choose a different one.')
+
+    def validate_national_id(self, national_id):
+        doctor = User.query.filter_by(national_id=national_id.data).first()
+        if doctor:
+            raise ValidationError('That national ID is taken. Please choose a different one.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -65,6 +72,10 @@ class UpdateAccountForm(FlaskForm):
     mobile_number = StringField('Mobile Number', validators=[DataRequired(), Length(11)])
     gender = StringField('Gender', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
+    national_id = StringField('National ID Number', validators=[DataRequired(), Length(14)])
+    scans = MultipleFileField('Upload your scans', validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    medical_history = TextAreaField('Medical History', validators=[DataRequired()])
+    salary = StringField('Salary', validators=[DataRequired()])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -78,6 +89,12 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email is taken. Please choose a different one.')
+    
+    def validate_national_id(self, national_id):
+        if national_id.data != current_user.national_id:
+            user = User.query.filter_by(national_id=national_id.data).first()
+            if user:
+                raise ValidationError('That national ID is taken. Please choose a different one.')
 
 class ContactUsForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=2, max=20)])
