@@ -1,9 +1,11 @@
+from datetime import datetime, date, time
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, MultipleFileField, DateTimeField
+from wtforms.fields.core import SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from his.models import User
+from his.models import User, Appointment
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
@@ -11,8 +13,11 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password',validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password',validators=[DataRequired(), EqualTo('password')])
     mobile_number = StringField('Mobile Number', validators=[DataRequired(), Length(11)])
+    national_id = StringField('National ID Number', validators=[DataRequired(), Length(11)])
     gender = StringField('Gender', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
+    picture = FileField('Choose Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    scans = MultipleFileField('Upload your scans', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -30,6 +35,28 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password',validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+class AppointmentForm(FlaskForm):
+    # available doctor appointments
+    # def __init__(self, formdata, **kwargs):
+    #     super().__init__(formdata=formdata, **kwargs)
+    #     self.
+    available_drs = [(doc.id, doc.username) for doc in User.query.filter_by(role='doctor')]
+    available_dates = [(i, f'{i:2d}:00') for i in range(9, 18)]
+ 
+    doctor_id = SelectField('Doctor', choices=available_drs, validators=[DataRequired()])
+    hour = SelectField('Time', choices=available_dates, validators=[DataRequired()])
+    submit = SubmitField('Reserve')
+
+    def validate_hour(self, hour):
+        # check if dr is available at that time
+        appointment_time = datetime.combine(date.today(), time(int(hour.data)))
+        # query appointment for any for the current doctor
+        reserved = Appointment.query.filter_by(doctor_id=int(self.doctor_id.data), datetime=appointment_time).first()
+        if reserved:
+            dr = User.query.get(int(self.doctor_id.data))
+            raise ValidationError(f'Dr {dr.username} is not available at that time. Please choose a different one.')
+
 
 class UpdateAccountForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])

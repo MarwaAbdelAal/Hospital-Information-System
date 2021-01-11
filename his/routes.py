@@ -3,8 +3,8 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from his import app, db, bcrypt
-from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountForm
-from his.models import User, ContactUs
+from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountForm, AppointmentForm
+from his.models import CTScan, User, ContactUs
 from flask_login import login_user, current_user, logout_user, login_required
 
 
@@ -25,6 +25,7 @@ def doctors():
 @app.route("/patients")
 @login_required
 def patients():
+    patients = []
     if current_user.role == 'doctor':
         patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
     elif current_user.role == 'admin':
@@ -40,9 +41,23 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password,
-        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='patient')
+        picture_file=None
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+
+        user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
+        password=hashed_password, mobile_number=form.mobile_number.data,
+        gender=form.gender.data, age=form.age.data, role='patient', image_file=picture_file)
+        scans = []
+        if form.scans.data:
+            for image in form.scans.data:
+                if isinstance(image, str):
+                    continue
+                picture_file = save_picture(image)
+                scan_obj = CTScan(image_file=picture_file, patient_id=user.id)
+                scans.append(scan_obj)
         db.session.add(user)
+        db.session.add_all(scans)
         db.session.commit()
         flash('Your patient account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
@@ -168,3 +183,30 @@ def contact_us():
         flash(f'Message sent from {form.name.data}!', 'success')
         return redirect(url_for('home'))
     return render_template('contact_us.html', title='Contact Us', form=form)
+
+@app.route("/reserve_appointment", methods=['GET', 'POST'])
+def reserve_appointment():
+    """Reserve new appointment
+    """
+    if not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = AppointmentForm()
+    if form.validate_on_submit():
+        print(f'got appointment data !!\n dr {form.doctor_id.data}\n')
+        # user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
+        # password=hashed_password, mobile_number=form.mobile_number.data,
+        # gender=form.gender.data, age=form.age.data, role='patient', image_file=picture_file)
+        # scans = []
+        # if form.scans.data:
+        #     for image in form.scans.data:
+        #         if isinstance(image, str):
+        #             continue
+        #         picture_file = save_picture(image)
+        #         scan_obj = CTScan(image_file=picture_file, patient_id=user.id)
+        #         scans.append(scan_obj)
+        # db.session.add(user)
+        # db.session.add_all(scans)
+        # db.session.commit()
+        # flash('Your patient account has been created! You are now able to log in', 'success')
+        # return redirect(url_for('login'))
+    return render_template('reserve_appointment.html', title='Reserve Appointment', form=form)
