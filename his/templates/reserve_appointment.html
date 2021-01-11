@@ -10,10 +10,10 @@
                 {{ form.doctor_id(class="form-control form-control-lg") }}
             </div>
             <div class="form-group">
-                {{ form.hour.label() }}
-                {{ form.hour(class="form-control form-control-lg") }}
-                {% if form.hour.errors %}
-                {% for error in form.hour.errors %}
+                {{ form.appointment_time.label() }}
+                {{ form.appointment_time(class="form-control form-control-lg")}}
+                {% if form.appointment_time.errors %}
+                {% for error in form.appointment_time.errors %}
                 <span class="text-danger">{{ error }}</span></br>
                 {% endfor %}
                 {% endif %}

@@ -1,11 +1,13 @@
+from datetime import timedelta
 import os
 import secrets
 from PIL import Image
-from flask import render_template, url_for, flash, redirect, request, abort
+from flask import render_template, url_for, flash, redirect, request, abort, Markup
 from his import app, db, bcrypt
 from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountForm, AppointmentForm
-from his.models import CTScan, User, ContactUs
+from his.models import Appointment, CTScan, User, ContactUs
 from flask_login import login_user, current_user, logout_user, login_required
+from his.utils import generate_gcalendar_link
 
 
 @app.route("/")
@@ -194,22 +196,25 @@ def reserve_appointment():
     if not current_user.is_authenticated:
         return redirect(url_for('home'))
     form = AppointmentForm()
+    available_drs = [(current_user.doctor_id, User.query.get(current_user.doctor_id).username)] if getattr(current_user, 'doctor_id', None) is not None else\
+                [(doc.id, doc.username) for doc in User.query.filter_by(role='doctor')]
+    form.doctor_id.choices = available_drs
     if form.validate_on_submit():
-        print(f'got appointment data !!\n dr {form.doctor_id.data}\n')
-        # user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
-        # password=hashed_password, mobile_number=form.mobile_number.data,
-        # gender=form.gender.data, age=form.age.data, role='patient', image_file=picture_file)
-        # scans = []
-        # if form.scans.data:
-        #     for image in form.scans.data:
-        #         if isinstance(image, str):
-        #             continue
-        #         picture_file = save_picture(image)
-        #         scan_obj = CTScan(image_file=picture_file, patient_id=user.id)
-        #         scans.append(scan_obj)
-        # db.session.add(user)
-        # db.session.add_all(scans)
-        # db.session.commit()
-        # flash('Your patient account has been created! You are now able to log in', 'success')
-        # return redirect(url_for('login'))
+        print(
+            f'got appointment data !!\n dr {form.doctor_id.data} on {form.appointment_time.data}\n')
+        new_app = Appointment(doctor_id=form.doctor_id.data, patient_id=current_user.id,
+                              datetime=form.appointment_time.data)
+        # assign this dr to this patient
+        patient = User.query.get(current_user.id)
+        patient.doctor_id = current_user.doctor_id = form.doctor_id.data
+
+        db.session.add(patient)
+        db.session.add(new_app)
+        db.session.commit()
+        doc = User.query.get(form.doctor_id.data)
+        gcalendar_link = generate_gcalendar_link(f"Appointment with dr {doc.username}",
+                                                 "", form.appointment_time.data, form.appointment_time.data+timedelta(hours=1))
+        flash(Markup(
+            f'A new appointment created, <a href="{gcalendar_link}" target="_blank">Add to your calendar</a>'), 'success')
+        return redirect(url_for('home'))
     return render_template('reserve_appointment.html', title='Reserve Appointment', form=form)
