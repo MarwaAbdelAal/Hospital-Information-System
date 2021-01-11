@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1 class="mb-3">Doctor: {{ doctor.username }}'s Patients ({{ patients }})</h1>
+    <h1 class="mb-3">Doctor: {{ doctor.username }}'s Patients</h1>
     {% for patient in patients %}
         <article class="media content-section">
           <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_pics/' + patient.image_file) }}">

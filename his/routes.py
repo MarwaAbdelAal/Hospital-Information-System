@@ -164,8 +164,11 @@ def delete_patient(patient_id):
 @login_required
 def doctor_patients(username):
     ########## Can't get patients of each doctor in doctor_patients ###########
-    doctor = User.query.filter_by(username=username, role='doctor').first_or_404()
-    return render_template('doctor_patients.html', patients=doctor.patients, doctor=doctor)
+    if current_user.role == 'admin':
+        doctor = User.query.filter_by(username=username, role='doctor').first_or_404()
+        return render_template('doctor_patients.html', patients=doctor.patients, doctor=doctor)
+    else:
+        return redirect(url_for('home'))
 
 @app.route("/message")
 @login_required
