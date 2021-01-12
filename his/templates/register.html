@@ -114,6 +114,22 @@
                         {{ form.age(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                {% if current_user.role == 'admin' %}
+                    <div class="form-group">
+                        {{ form.salary.label(class="form-control-label") }}
+
+                        {% if form.salary.errors %}
+                            {{ form.salary(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.salary.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.salary(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                {% endif %}
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}

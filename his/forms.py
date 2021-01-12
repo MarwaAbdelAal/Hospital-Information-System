@@ -19,11 +19,12 @@ class RegistrationForm(FlaskForm):
     mobile_number = StringField('Mobile Number', validators=[
                                 DataRequired(), Length(11)])
     national_id = StringField('National ID Number', validators=[
-                              DataRequired(), Length(11)])
+                              DataRequired(), Length(14)])
     gender = StringField('Gender', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
     picture = FileField('Choose Profile Picture', validators=[
                         FileAllowed(['jpg', 'png'])])
+    salary = StringField('Salary', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -38,6 +39,12 @@ class RegistrationForm(FlaskForm):
             raise ValidationError(
                 'That email is taken. Please choose a different one.')
 
+    def validate_national_id(self, national_id):
+        doctor = User.query.filter_by(national_id=national_id.data).first()
+        if doctor:
+            raise ValidationError(
+                'That national_id is taken. Please choose a different one.')
+
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -47,10 +54,6 @@ class LoginForm(FlaskForm):
 
 
 class AppointmentForm(FlaskForm):
-    # available doctor appointments
-    # def __init__(self, formdata, **kwargs):
-    #     super().__init__(formdata=formdata, **kwargs)
-    #     self.
     available_drs = [(doc.id, doc.username)
                      for doc in User.query.filter_by(role='doctor')]
 
@@ -67,7 +70,7 @@ class AppointmentForm(FlaskForm):
         # query appointment for any for the current doctor
         appointment_time = appointment_time.data
         reserved = Appointment.query.filter_by(doctor_id=int(
-            self.doctor_id.data)).filter(Appointment.datetime.between(appointment_time-timedelta(minutes=30), appointment_time+timedelta(minutes=30))).first()
+            self.doctor_id.data)).filter(Appointment.datetime.between(appointment_time-timedelta(minutes=29), appointment_time+timedelta(minutes=29))).first()
         if reserved:
             dr = User.query.get(int(self.doctor_id.data))
             raise ValidationError(
@@ -87,6 +90,11 @@ class UpdateAccountForm(FlaskForm):
         FileAllowed(['jpg', 'png'])])
 
     age = StringField('Age', validators=[DataRequired()])
+    national_id = StringField('National ID Number', validators=[
+                              DataRequired(), Length(14)])
+    medical_history = TextAreaField('Medical History', validators=[DataRequired()])
+    salary = StringField('Salary', validators=[DataRequired()])
+
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -102,6 +110,13 @@ class UpdateAccountForm(FlaskForm):
             if user:
                 raise ValidationError(
                     'That email is taken. Please choose a different one.')
+
+    def validate_national_id(self, national_id):
+        if national_id.data != current_user.national_id:
+            user = User.query.filter_by(national_id=national_id.data).first()
+            if user:
+                raise ValidationError(
+                    'That national_id is taken. Please choose a different one.')
 
 
 class ContactUsForm(FlaskForm):

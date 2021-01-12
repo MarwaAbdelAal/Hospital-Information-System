@@ -27,7 +27,7 @@ def doctors():
 @app.route("/patients")
 @login_required
 def patients():
-    patients = []
+    # patients = []
     if current_user.role == 'doctor':
         patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
     elif current_user.role == 'admin':
@@ -63,7 +63,7 @@ def register_doctor():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password,
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, salary=form.salary.data,
         mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='doctor')
         db.session.add(user)
         db.session.commit()
@@ -118,6 +118,9 @@ def account():
         current_user.mobile_number = form.mobile_number.data
         current_user.gender = form.gender.data
         current_user.age = form.age.data
+        current_user.national_id = form.national_id.data
+        current_user.salary = form.salary.data
+        current_user.medical_history = form.medical_history.data
         scans = []
         if form.scans.data:
             for image in form.scans.data:
@@ -136,6 +139,9 @@ def account():
         form.mobile_number.data = current_user.mobile_number
         form.gender.data = current_user.gender
         form.age.data = current_user.age
+        form.national_id.data = current_user.national_id
+        form.salary.data = current_user.salary
+        form.medical_history.data = current_user.medical_history
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
@@ -210,7 +216,7 @@ def reserve_appointment():
         db.session.commit()
         doc = User.query.get(form.doctor_id.data)
         gcalendar_link = generate_gcalendar_link(f"Appointment with dr {doc.username}",
-                                                 "", form.appointment_time.data, form.appointment_time.data+timedelta(hours=1))
+                                                 "", form.appointment_time.data, form.appointment_time.data+timedelta(minutes=30))
         flash(Markup(
             f'A new appointment created, <a href="{gcalendar_link}" target="_blank">Add to your calendar</a>'), 'success')
         return redirect(url_for('home'))
