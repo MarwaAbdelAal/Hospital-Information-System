@@ -1,4 +1,4 @@
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
@@ -67,7 +67,7 @@ class AppointmentForm(FlaskForm):
         # query appointment for any for the current doctor
         appointment_time = appointment_time.data
         reserved = Appointment.query.filter_by(doctor_id=int(
-            self.doctor_id.data), datetime=appointment_time).first()
+            self.doctor_id.data)).filter(Appointment.datetime.between(appointment_time-timedelta(minutes=30), appointment_time+timedelta(minutes=30))).first()
         if reserved:
             dr = User.query.get(int(self.doctor_id.data))
             raise ValidationError(
