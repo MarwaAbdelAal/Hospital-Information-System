@@ -24,8 +24,6 @@ class RegistrationForm(FlaskForm):
     age = StringField('Age', validators=[DataRequired()])
     picture = FileField('Choose Profile Picture', validators=[
                         FileAllowed(['jpg', 'png'])])
-    scans = MultipleFileField('Upload your scans', validators=[
-                              FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -53,7 +51,8 @@ class AppointmentForm(FlaskForm):
     # def __init__(self, formdata, **kwargs):
     #     super().__init__(formdata=formdata, **kwargs)
     #     self.
-    available_drs = [(doc.id, doc.username) for doc in User.query.filter_by(role='doctor')] 
+    available_drs = [(doc.id, doc.username)
+                     for doc in User.query.filter_by(role='doctor')]
 
     doctor_id = SelectField(
         'Doctor', choices=available_drs, validators=[DataRequired()])
@@ -84,6 +83,9 @@ class UpdateAccountForm(FlaskForm):
     mobile_number = StringField('Mobile Number', validators=[
                                 DataRequired(), Length(11)])
     gender = StringField('Gender', validators=[DataRequired()])
+    scans = MultipleFileField('Upload your scans', validators=[
+        FileAllowed(['jpg', 'png'])])
+
     age = StringField('Age', validators=[DataRequired()])
     submit = SubmitField('Update')
 

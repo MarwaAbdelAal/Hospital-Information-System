@@ -42,24 +42,12 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        picture_file=None
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-
+        hashed_password = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
         password=hashed_password, mobile_number=form.mobile_number.data,
-        gender=form.gender.data, age=form.age.data, role='patient', image_file=picture_file)
-        scans = []
-        if form.scans.data:
-            for image in form.scans.data:
-                if isinstance(image, str):
-                    continue
-                picture_file = save_picture(image)
-                scan_obj = CTScan(image_file=picture_file, patient_id=user.id)
-                scans.append(scan_obj)
+                    gender=form.gender.data, age=form.age.data, role='patient')
         db.session.add(user)
-        db.session.add_all(scans)
         db.session.commit()
         flash('Your patient account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
@@ -130,6 +118,15 @@ def account():
         current_user.mobile_number = form.mobile_number.data
         current_user.gender = form.gender.data
         current_user.age = form.age.data
+        scans = []
+        if form.scans.data:
+            for image in form.scans.data:
+                if isinstance(image, str):
+                    continue
+                picture_file = save_picture(image)
+                scan_obj = CTScan(image_file=picture_file, patient_id=current_user.id)
+                scans.append(scan_obj)
+        db.session.add_all(scans)
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
