@@ -2,7 +2,7 @@ from datetime import datetime, date, time, timedelta
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, MultipleFileField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, MultipleFileField, IntegerField
 from wtforms.fields.html5 import DateTimeField, DateTimeLocalField
 from wtforms.fields.core import SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, Required, ValidationError
@@ -20,11 +20,10 @@ class RegistrationForm(FlaskForm):
                                 DataRequired(), Length(11)])
     national_id = StringField('National ID Number', validators=[
                               DataRequired(), Length(14)])
-    gender = StringField('Gender', validators=[DataRequired()])
-    age = StringField('Age', validators=[DataRequired()])
-    picture = FileField('Choose Profile Picture', validators=[
-                        FileAllowed(['jpg', 'png'])])
-    salary = StringField('Salary', validators=[DataRequired()])
+    age = IntegerField('Age', validators=[DataRequired()])
+    gender = SelectField('Gender', choices=[
+        ('male', 'male'), ('female', 'female')], validators=[DataRequired()])
+    salary = IntegerField('Salary', default=0, validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
