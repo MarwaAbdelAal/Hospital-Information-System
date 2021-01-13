@@ -52,7 +52,7 @@ class CTScan(db.Model):
 
     def __repr__(self) -> str:
         patient = User.query.get(self.id)
-        return f'Patient {patient.username} scan image {self.image_file}'
+        return f'Patient {patient.username} scan, image at {self.image_file}'
 
 
 class ContactUs(db.Model):

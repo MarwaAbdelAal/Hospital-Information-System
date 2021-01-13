@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block content %}
+{% for app in appointments %}
+<article class="media content-section">
+  <div class="media-body">
+    <h2><a class="article-title" href="#">{{app}}</a></h2>
+    <p class="article-content">doctor id : {{ app.doctor_id }}</p>
+    <p class="article-content">patient id: {{ app.patient_id }}</p>
+  </div>
+</article>
+{% endfor %}
+{% endblock content %}
