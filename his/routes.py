@@ -4,7 +4,7 @@ import secrets
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort, Markup
 from his import app, db, bcrypt
-from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountForm, AppointmentForm
+from his.forms import PRegistrationForm, DRegistrationForm, LoginForm, ContactUsForm, PUpdateAccountForm, DUpdateAccountForm, AppointmentForm
 from his.models import Appointment, CTScan, User, ContactUs
 from flask_login import login_user, current_user, logout_user, login_required
 from his.utils import generate_gcalendar_link
@@ -27,27 +27,26 @@ def doctors():
 @app.route("/patients")
 @login_required
 def patients():
-    # patients = []
     if current_user.role == 'doctor':
         patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
     elif current_user.role == 'admin':
         patients = User.query.filter_by(role='patient')
     return render_template('patients.html', patients=patients)
 
-@app.route("/register", methods=['GET', 'POST'])
-def register():
+@app.route("/register_patient", methods=['GET', 'POST'])
+def register_patient():
     """register for patients
     """
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-    form = RegistrationForm()
+    form = PRegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(
             form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
-        password=hashed_password, mobile_number=form.mobile_number.data,
+        patient = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
+                    password=hashed_password, mobile_number=form.mobile_number.data, medical_history=form.medical_history.data,
                     gender=form.gender.data, age=form.age.data, role='patient')
-        db.session.add(user)
+        db.session.add(patient)
         db.session.commit()
         flash('Your patient account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
@@ -60,14 +59,15 @@ def register_doctor():
     """
     if current_user.role != 'admin':
         return redirect(url_for('home'))
-    form = RegistrationForm()
+    form = DRegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password, salary=form.salary.data,
-        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='doctor')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, 
+        national_id=form.national_id.data, salary=form.salary.data, mobile_number=form.mobile_number.data,
+        gender=form.gender.data, age=form.age.data, role='doctor')
         db.session.add(user)
         db.session.commit()
-        flash('A new doctor has been added! He is now able to log in', 'success')
+        flash('A new doctor has been added! He/She is now able to log in', 'success')
         return redirect(url_for('doctors'))
     return render_template('register.html', title='Register', form=form)
 
@@ -105,10 +105,10 @@ def save_picture(form_picture):
 
     return picture_fn
 
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/paccount", methods=['GET', 'POST'])
 @login_required
-def account():
-    form = UpdateAccountForm()
+def paccount():
+    form = PUpdateAccountForm()
     if form.validate_on_submit():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
@@ -119,7 +119,6 @@ def account():
         current_user.gender = form.gender.data
         current_user.age = form.age.data
         current_user.national_id = form.national_id.data
-        current_user.salary = form.salary.data
         current_user.medical_history = form.medical_history.data
         scans = []
         if form.scans.data:
@@ -132,7 +131,7 @@ def account():
         db.session.add_all(scans)
         db.session.commit()
         flash('Your account has been updated!', 'success')
-        return redirect(url_for('account'))
+        return redirect(url_for('paccount'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
@@ -140,11 +139,36 @@ def account():
         form.gender.data = current_user.gender
         form.age.data = current_user.age
         form.national_id.data = current_user.national_id
-        form.salary.data = current_user.salary
         form.medical_history.data = current_user.medical_history
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
+@app.route("/daccount", methods=['GET', 'POST'])
+@login_required
+def daccount():
+    form = DUpdateAccountForm()
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.mobile_number = form.mobile_number.data
+        current_user.gender = form.gender.data
+        current_user.age = form.age.data
+        current_user.national_id = form.national_id.data
+        db.session.commit()
+        flash('Your account has been updated!', 'success')
+        return redirect(url_for('daccount'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.mobile_number.data = current_user.mobile_number
+        form.gender.data = current_user.gender
+        form.age.data = current_user.age
+        form.national_id.data = current_user.national_id
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', title='Account', image_file=image_file, form=form)
 
 @app.route("/patient/<int:patient_id>")
 @login_required

@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, Required, V
 from his.models import User, Appointment
 
 
-class RegistrationForm(FlaskForm):
+class PRegistrationForm(FlaskForm):
     username = StringField('Username', validators=[
                            DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -23,7 +23,7 @@ class RegistrationForm(FlaskForm):
     age = IntegerField('Age', validators=[DataRequired()])
     gender = SelectField('Gender', choices=[
         ('male', 'male'), ('female', 'female')], validators=[DataRequired()])
-    salary = IntegerField('Salary', default=0, validators=[DataRequired()])
+    medical_history = TextAreaField('Medical History', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
@@ -44,6 +44,40 @@ class RegistrationForm(FlaskForm):
             raise ValidationError(
                 'That national_id is taken. Please choose a different one.')
 
+class DRegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[
+                           DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[
+                                     DataRequired(), EqualTo('password')])
+    mobile_number = StringField('Mobile Number', validators=[
+                                DataRequired(), Length(11)])
+    national_id = StringField('National ID Number', validators=[
+                              DataRequired(), Length(14)])
+    age = IntegerField('Age', validators=[DataRequired()])
+    gender = SelectField('Gender', choices=[
+        ('male', 'male'), ('female', 'female')], validators=[DataRequired()])
+    salary = IntegerField('Salary', default=1000, validators=[DataRequired()])
+    submit = SubmitField('Sign Up')
+
+    def validate_username(self, username):
+        doctor = User.query.filter_by(username=username.data).first()
+        if doctor:
+            raise ValidationError(
+                'That username is taken. Please choose a different one.')
+
+    def validate_email(self, email):
+        doctor = User.query.filter_by(email=email.data).first()
+        if doctor:
+            raise ValidationError(
+                'That email is taken. Please choose a different one.')
+
+    def validate_national_id(self, national_id):
+        doctor = User.query.filter_by(national_id=national_id.data).first()
+        if doctor:
+            raise ValidationError(
+                'That national_id is taken. Please choose a different one.')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -76,7 +110,7 @@ class AppointmentForm(FlaskForm):
                 f'Dr {dr.username} is not available at that time. Please choose a different one.')
 
 
-class UpdateAccountForm(FlaskForm):
+class PUpdateAccountForm(FlaskForm):
     username = StringField('Username', validators=[
                            DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -84,15 +118,15 @@ class UpdateAccountForm(FlaskForm):
                         FileAllowed(['jpg', 'png'])])
     mobile_number = StringField('Mobile Number', validators=[
                                 DataRequired(), Length(11)])
-    gender = StringField('Gender', validators=[DataRequired()])
+    gender = SelectField('Gender', choices=[
+        ('male', 'male'), ('female', 'female')], validators=[DataRequired()])
     scans = MultipleFileField('Upload your scans', validators=[
         FileAllowed(['jpg', 'png'])])
 
-    age = StringField('Age', validators=[DataRequired()])
+    age = IntegerField('Age', validators=[DataRequired()])
     national_id = StringField('National ID Number', validators=[
                               DataRequired(), Length(14)])
     medical_history = TextAreaField('Medical History', validators=[DataRequired()])
-    salary = StringField('Salary', validators=[DataRequired()])
 
     submit = SubmitField('Update')
 
@@ -110,13 +144,51 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError(
                     'That email is taken. Please choose a different one.')
 
-    def validate_national_id(self, national_id):
-        if national_id.data != current_user.national_id:
-            user = User.query.filter_by(national_id=national_id.data).first()
+    # def validate_national_id(self, national_id):
+    #     if national_id.data != current_user.national_id:
+    #         user = User.query.filter_by(national_id=national_id.data).first()
+    #         if user:
+    #             raise ValidationError(
+    #                 'That national_id is taken. Please choose a different one.')
+
+class DUpdateAccountForm(FlaskForm):
+    username = StringField('Username', validators=[
+                           DataRequired(), Length(min=2, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    picture = FileField('Update Profile Picture', validators=[
+                        FileAllowed(['jpg', 'png'])])
+    mobile_number = StringField('Mobile Number', validators=[
+                                DataRequired(), Length(11)])
+    gender = SelectField('Gender', choices=[
+        ('male', 'male'), ('female', 'female')], validators=[DataRequired()])
+
+    age = IntegerField('Age', validators=[DataRequired()])
+    national_id = StringField('National ID Number', validators=[
+                              DataRequired(), Length(14)])
+    salary = IntegerField('Salary', default=1000, validators=[DataRequired()])
+
+    submit = SubmitField('Update')
+
+    def validate_username(self, username):
+        if username.data != current_user.username:
+            user = User.query.filter_by(username=username.data).first()
             if user:
                 raise ValidationError(
-                    'That national_id is taken. Please choose a different one.')
+                    'That username is taken. Please choose a different one.')
 
+    def validate_email(self, email):
+        if email.data != current_user.email:
+            user = User.query.filter_by(email=email.data).first()
+            if user:
+                raise ValidationError(
+                    'That email is taken. Please choose a different one.')
+
+    # def validate_national_id(self, national_id):
+    #     if national_id.data != current_user.national_id:
+    #         user = User.query.filter_by(national_id=national_id.data).first()
+    #         if user:
+    #             raise ValidationError(
+    #                 'That national_id is taken. Please choose a different one.')
 
 class ContactUsForm(FlaskForm):
     name = StringField('Name', validators=[

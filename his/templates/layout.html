@@ -40,9 +40,10 @@
                     <div class="navbar-nav" style="padding-left: 500px;">
                         {% if current_user.role == 'doctor' %}
                             <a class="nav-item nav-link" href="{{ url_for('patients') }}">Your Patients</a>
-                            <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
+                            <a class="nav-item nav-link" href="{{ url_for('daccount') }}">Account</a>
                         {% elif current_user.role == 'patient' %}
-                            <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
+                            <a class="nav-item nav-link" href="{{ url_for('paccount') }}">Account</a>
+                            <a class="nav-item nav-link" href="{{ url_for('reserve_appointment') }}">Reserve Appointment</a>
                         {% elif current_user.role == 'admin' %}
                             <a class="nav-item nav-link" href="{{ url_for('register_doctor') }}">Add Doctor</a>
                             <a class="nav-item nav-link" href="{{ url_for('patients') }}">Patients</a>
@@ -52,7 +53,7 @@
                             <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                         {% else %}
                             <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
-                            <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
+                            <a class="nav-item nav-link" href="{{ url_for('register_patient') }}">Register</a>
                         {% endif %}
                     </div>
                 </div>

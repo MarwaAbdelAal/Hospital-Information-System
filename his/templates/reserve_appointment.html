@@ -13,22 +13,15 @@
                 {{ form.appointment_time.label() }}
                 {{ form.appointment_time(class="form-control form-control-lg")}}
                 {% if form.appointment_time.errors %}
-                {% for error in form.appointment_time.errors %}
-                <span class="text-danger">{{ error }}</span></br>
-                {% endfor %}
+                    {% for error in form.appointment_time.errors %}
+                        <span class="text-danger">{{ error }}</span></br>
+                    {% endfor %}
                 {% endif %}
-
             </div>
-
         </fieldset>
         <div class="form-group">
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
     </form>
-</div>
-<div class="border-top pt-3">
-    <small class="text-muted">
-        Already Have An Account? <a class="ml-2" href="{{ url_for('login') }}">Sign In</a>
-    </small>
 </div>
 {% endblock content %}

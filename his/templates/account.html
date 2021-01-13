@@ -104,7 +104,7 @@
                         {{ form.age(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                {% if current_user.is_authenticated and (current_user.role == 'patient') %}
+                {% if current_user.role == 'patient' %}
                     <div class="form-group">
                         {{ form.medical_history.label(class="form-control-label") }}
 
@@ -128,8 +128,7 @@
                             {% endfor %}
                         {% endif %}
                     </div>
-                {% endif %}
-                {% if current_user.is_authenticated and (current_user.role == 'doctor') %}
+                {% elif current_user.role == 'doctor' %}
                     <div class="form-group">
                         {{ form.salary.label(class="form-control-label") }}
 
