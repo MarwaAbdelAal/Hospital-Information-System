@@ -15,24 +15,29 @@ from his.utils import generate_gcalendar_link
 def home():
     return render_template('home.html')
 
+
 @app.route("/about")
 def about():
     return render_template('about.html', title='About')
+
 
 @app.route("/doctors")
 def doctors():
     doctors = User.query.filter_by(role='doctor')
     return render_template('doctors.html', doctors=doctors)
 
+
 @app.route("/patients")
 @login_required
 def patients():
     patients = []
     if current_user.role == 'doctor':
-        patients = User.query.filter_by(role='patient', doctor_id=current_user.id)
+        patients = User.query.filter_by(
+            role='patient', doctor_id=current_user.id)
     elif current_user.role == 'admin':
         patients = User.query.filter_by(role='patient')
     return render_template('patients.html', patients=patients)
+
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -45,13 +50,15 @@ def register():
         hashed_password = bcrypt.generate_password_hash(
             form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
-        password=hashed_password, mobile_number=form.mobile_number.data,
+                    password=hashed_password, mobile_number=form.mobile_number.data,
                     gender=form.gender.data, age=form.age.data, role='patient')
         db.session.add(user)
         db.session.commit()
-        flash('Your patient account has been created! You are now able to log in', 'success')
+        flash(
+            'Your patient account has been created! You are now able to log in', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
 
 @app.route("/register_doctor", methods=['GET', 'POST'])
 @login_required
@@ -62,9 +69,10 @@ def register_doctor():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        hashed_password = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password,
-        mobile_number=form.mobile_number.data,gender=form.gender.data, age=form.age.data, role='doctor')
+                    mobile_number=form.mobile_number.data, gender=form.gender.data, age=form.age.data, role='doctor')
         db.session.add(user)
         db.session.commit()
         flash('A new doctor has been added! He is now able to log in', 'success')
@@ -87,16 +95,19 @@ def login():
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html', title='Login', form=form)
 
+
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for('home'))
 
+
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
     picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    picture_path = os.path.join(
+        app.root_path, 'static/profile_pics', picture_fn)
 
     output_size = (125, 125)
     i = Image.open(form_picture)
@@ -104,6 +115,7 @@ def save_picture(form_picture):
     i.save(picture_path)
 
     return picture_fn
+
 
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
@@ -124,7 +136,8 @@ def account():
                 if isinstance(image, str):
                     continue
                 picture_file = save_picture(image)
-                scan_obj = CTScan(image_file=picture_file, patient_id=current_user.id)
+                scan_obj = CTScan(image_file=picture_file,
+                                  patient_id=current_user.id)
                 scans.append(scan_obj)
         db.session.add_all(scans)
         db.session.commit()
@@ -136,15 +149,18 @@ def account():
         form.mobile_number.data = current_user.mobile_number
         form.gender.data = current_user.gender
         form.age.data = current_user.age
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    image_file = url_for(
+        'static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
 
 @app.route("/patient/<int:patient_id>")
 @login_required
 def patient(patient_id):
-    patient = User.query.filter_by(id=patient_id, role='patient').first_or_404()
-    doctor = User.query.filter_by(id=patient.doctor_id, role='doctor').first_or_404()
+    patient = User.query.filter_by(
+        id=patient_id, role='patient').first_or_404()
+    doctor = User.query.filter_by(
+        id=patient.doctor_id, role='doctor').first_or_404()
     return render_template('patient.html', title=patient.username, patient=patient, doctor=doctor)
 
 
@@ -159,15 +175,18 @@ def delete_patient(patient_id):
     flash('Your patient has been deleted!', 'success')
     return redirect(url_for('patients'))
 
+
 @app.route("/doctor/<string:username>")
 @login_required
 def doctor_patients(username):
     ########## Can't get patients of each doctor in doctor_patients ###########
     if current_user.role == 'admin':
-        doctor = User.query.filter_by(username=username, role='doctor').first_or_404()
+        doctor = User.query.filter_by(
+            username=username, role='doctor').first_or_404()
         return render_template('doctor_patients.html', patients=doctor.patients, doctor=doctor)
     else:
         return redirect(url_for('home'))
+
 
 @app.route("/message")
 @login_required
@@ -175,16 +194,19 @@ def message():
     messages = ContactUs.query.all()
     return render_template('messages.html', messages=messages)
 
+
 @app.route("/contact_us", methods=['GET', 'POST'])
 def contact_us():
     form = ContactUsForm()
     if form.validate_on_submit():
-        comment = ContactUs(name=form.name.data, email=form.email.data, mobile_number=form.mobile_number.data, subject=form.subject.data, message=form.message.data)
+        comment = ContactUs(name=form.name.data, email=form.email.data,
+                            mobile_number=form.mobile_number.data, subject=form.subject.data, message=form.message.data)
         db.session.add(comment)
         db.session.commit()
         flash(f'Message sent from {form.name.data}!', 'success')
         return redirect(url_for('home'))
     return render_template('contact_us.html', title='Contact Us', form=form)
+
 
 @app.route("/reserve_appointment", methods=['GET', 'POST'])
 def reserve_appointment():
@@ -194,7 +216,7 @@ def reserve_appointment():
         return redirect(url_for('home'))
     form = AppointmentForm()
     available_drs = [(current_user.doctor_id, User.query.get(current_user.doctor_id).username)] if getattr(current_user, 'doctor_id', None) is not None else\
-                [(doc.id, doc.username) for doc in User.query.filter_by(role='doctor')]
+        [(doc.id, doc.username) for doc in User.query.filter_by(role='doctor')]
     form.doctor_id.choices = available_drs
     if form.validate_on_submit():
         print(
@@ -215,3 +237,33 @@ def reserve_appointment():
             f'A new appointment created, <a href="{gcalendar_link}" target="_blank">Add to your calendar</a>'), 'success')
         return redirect(url_for('home'))
     return render_template('reserve_appointment.html', title='Reserve Appointment', form=form)
+
+
+@app.route("/appointments")
+@login_required
+def get_appointments():
+    appointments = []
+    if current_user.role == 'doctor':
+        appointments = Appointment.query.filter_by(
+            doctor_id=current_user.id).all()
+    elif current_user.role == 'patient':
+        appointments = Appointment.query.filter_by(
+            patient_id=current_user.id).all()
+    elif current_user.role == 'admin':
+        appointments = Appointment.query.all()
+    return render_template("appointments.html", appointments=appointments)
+
+
+@app.route("/scans")
+@login_required
+def get_scans():
+    scans = []
+    if current_user.role == 'doctor':
+        patients = User.query.filter_by(doctor_id=current_user.id).all()
+        for patient in patients:
+            scans.extend(patient.scans if patient.scans else [])
+    elif current_user.role == 'patient':
+        scans = CTScan.query.filter_by(patient_id=current_user.id).all()
+    elif current_user.role == 'admin':
+        scans = CTScan.query.all()
+    return render_template("scans.html", scans=scans)
