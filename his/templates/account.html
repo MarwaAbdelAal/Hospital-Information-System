@@ -63,6 +63,20 @@
                     {% endif %}
                 </div>
                 <div class="form-group">
+                    {{ form.national_id.label(class="form-control-label") }}
+
+                    {% if form.national_id.errors %}
+                        {{ form.national_id(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.national_id.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.national_id(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
                     {{ form.gender.label(class="form-control-label") }}
 
                     {% if form.gender.errors %}
@@ -90,16 +104,38 @@
                         {{ form.age(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group">
-                    {{ form.scans.label() }}
-                    {{ form.scans(class="form-control-file") }}
-                    {% if form.scans.errors %}
-                    {% for error in form.scans.errors %}
-                    <span class="text-danger">{{ error }}</span></br>
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                {% if current_user.is_authenticated and (current_user.role == 'patient') %}
+                    <div class="form-group">
+                        {{ form.medical_history.label(class="form-control-label") }}
 
+                        {% if form.medical_history.errors %}
+                            {{ form.medical_history(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.medical_history.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.medical_history(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.scans.label() }}
+                        {{ form.scans(class="form-control-file") }}
+                        {% if form.scans.errors %}
+                            {% for error in form.scans.errors %}
+                                <span class="text-danger">{{ error }}</span></br>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+                {% if current_user.is_authenticated and (current_user.role == 'doctor') %}
+                    <div class="form-group">
+                        {{ form.salary.label(class="form-control-label") }}
+
+                        {{ form.salary(class="form-control form-control-lg", readonly=true) }}
+                    </div>
+                {% endif %}
             </fieldset>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}

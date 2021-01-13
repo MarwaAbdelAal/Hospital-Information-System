@@ -7,7 +7,6 @@
             <div class="article-metadata">
               <i class="mr-2">{{ patient.email }}</i>
               <small class="text-muted">{{ patient.mobile_number }}</small></br>
-              <a class="mr-2" href="{{ url_for('doctor_patients', username=patient.username) }}">Doctor: {{ patient.username }}</a>
             </div>
             <h2><a class="article-title" href="{{ url_for('patient', patient_id=patient.id) }}">{{ patient.username }}</a></h2>
             <p class="article-content">{{ patient.gender }}</p>
