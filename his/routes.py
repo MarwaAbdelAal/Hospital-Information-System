@@ -8,7 +8,7 @@ from his.forms import RegistrationForm, LoginForm, ContactUsForm, UpdateAccountF
 from his.models import Appointment, CTScan, User, ContactUs
 from flask_login import login_user, current_user, logout_user, login_required
 from his.utils import generate_gcalendar_link
-
+from his import dashboard
 
 @app.route("/")
 @app.route("/home")
@@ -271,3 +271,7 @@ def get_scans():
     elif current_user.role == 'admin':
         scans = CTScan.query.all()
     return render_template("scans.html", scans=scans)
+
+@app.route("/dash/")
+def dash_app_1():
+    return render_template('dashapps/dash_app.html', dash_url=dashboard.URL_BASE)
