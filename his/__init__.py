@@ -12,4 +12,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
+from his.dashboard import add_dash
+app = add_dash(app)
 from his import routes

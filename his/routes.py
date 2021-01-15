@@ -8,7 +8,7 @@ from his.forms import PRegistrationForm, DRegistrationForm, LoginForm, ContactUs
 from his.models import Appointment, CTScan, User, ContactUs
 from flask_login import login_user, current_user, logout_user, login_required
 from his.utils import generate_gcalendar_link
-
+from his import dashboard
 
 @app.route("/")
 @app.route("/home")
@@ -38,8 +38,8 @@ def patients():
     return render_template('patients.html', patients=patients)
 
 
-@app.route("/register", methods=['GET', 'POST'])
-def register():
+@app.route("/register_patient", methods=['GET', 'POST'])
+def register_patient():
     """register for patients
     """
     if current_user.is_authenticated:
@@ -48,8 +48,8 @@ def register():
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(
             form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
-                    password=hashed_password, mobile_number=form.mobile_number.data,
+        patient = User(username=form.username.data, email=form.email.data, national_id=form.national_id.data,
+                    password=hashed_password, mobile_number=form.mobile_number.data, medical_history=form.medical_history.data,
                     gender=form.gender.data, age=form.age.data, role='patient')
         db.session.add(patient)
         db.session.commit()
@@ -116,7 +116,7 @@ def save_picture(form_picture):
     return picture_fn
 
 
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/paccount", methods=['GET', 'POST'])
 @login_required
 def paccount():
     form = PUpdateAccountForm()
@@ -295,3 +295,7 @@ def get_scans():
     elif current_user.role == 'admin':
         scans = CTScan.query.all()
     return render_template("scans.html", scans=scans)
+
+@app.route("/dash/")
+def dash_app_1():
+    return render_template('dashapps/dash_app.html', dash_url=dashboard.URL_BASE)
