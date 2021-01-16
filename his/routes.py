@@ -220,7 +220,8 @@ def doctor_patients(username):
 @login_required
 def message():
     messages = ContactUs.query.all()
-    return render_template('messages.html', messages=messages)
+    count_messages = len(messages)
+    return render_template('messages.html', messages=messages, count_messages=count_messages)
 
 
 @app.route("/contact_us", methods=['GET', 'POST'])

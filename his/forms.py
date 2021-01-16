@@ -58,7 +58,7 @@ class DRegistrationForm(FlaskForm):
     age = IntegerField('Age', validators=[DataRequired()])
     gender = SelectField('Gender', choices=[
         ('male', 'male'), ('female', 'female')], validators=[DataRequired()])
-    salary = IntegerField('Salary', default=1000, validators=[DataRequired()])
+    salary = IntegerField('Salary', default=2000, validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):
