@@ -51,6 +51,7 @@
                             <a class="nav-item nav-link" href="{{ url_for('/dash/') }}">Statistical Analysis</a>
                         {% endif %}
                         {% if current_user.is_authenticated %}
+                            <a class="nav-item nav-link" href="{{ url_for('get_appointments') }}">Appointments</a>
                             <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                         {% else %}
                             <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>

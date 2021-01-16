@@ -1,12 +1,36 @@
 {% extends "layout.html" %}
 {% block content %}
-{% for app in appointments %}
-<article class="media content-section">
-  <div class="media-body">
-    <h2><a class="article-title" href="#">{{app}}</a></h2>
-    <p class="article-content">doctor id : {{ app.doctor_id }}</p>
-    <p class="article-content">patient id: {{ app.patient_id }}</p>
-  </div>
-</article>
-{% endfor %}
+    <h1>Your appointments</h1>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          {% if current_user.role != 'patient' %}
+          <th scope="col">Patient</th>
+          {% endif %}
+          {% if current_user.role == 'patient' or current_user.role == 'admin' %}
+          <th scope="col">Doctor</th>
+          {% endif %}
+          <th scope="col">Time</th>
+        </tr>
+      </thead>
+
+      <tbody>
+          {% for result in results %}
+        <tr>
+          <th scope="row">{{ loop.index }}</th>
+          {% if current_user.role != 'patient' %}
+          <td>{{ result[2].username }}</td>
+          {% endif %}
+          {% if current_user.role == 'patient' or current_user.role == 'admin' %}
+          <td>{{ result[1].username }}</td>
+          {% endif %}
+          <td>{{ result[0].datetime }}</td>
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+
 {% endblock content %}

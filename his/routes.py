@@ -280,7 +280,13 @@ def get_appointments():
             patient_id=current_user.id).all()
     elif current_user.role == 'admin':
         appointments = Appointment.query.all()
-    return render_template("appointments.html", appointments=appointments)
+
+    doctors = [User.query.get(app.doctor_id) for app in appointments]
+    patients = [User.query.get(app.patient_id) for app in appointments]
+
+    results = [(app,doctor,patient) for (app,doctor,patient) in zip(appointments,doctors,patients)]
+
+    return render_template("appointments.html", results=results)
 
 
 @app.route("/scans")
