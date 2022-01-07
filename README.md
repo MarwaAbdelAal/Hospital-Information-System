@@ -1,5 +1,14 @@
 # Hospital Information System
 
+### PIP Dependencies
+
+- Install dependencies by naviging to the project directory and running:
+  ```
+    pip install -r requirements.txt
+  ```
+  This will install all of the required packages we selected within the requirements.txt file.
+
+
 ## *About the system*
 
 1. different users can use the application and each category can do different stuff (eg. Doctors, Patients, Admin, ..etc)
@@ -36,12 +45,3 @@
 6. statistical analysis for the admin entry
   ![statistical analysis](images/stat_analysis.jpg)
   ![statistical analysis](images/analysis.jpeg)
-
-
-### PIP Dependencies
-
-- Install dependencies by naviging to the project directory and running:
-  ```
-    pip install -r requirements.txt
-  ```
-  This will install all of the required packages we selected within the requirements.txt file.
