@@ -45,7 +45,7 @@ class Appointment(db.Model):
         patient = User.query.get(self.patient_id)
         return f"Appointment between doctor: {doctor.username} and patient {patient.username} at {self.datetime.isoformat()}"
 
-class CTScan(db.model):
+class CTScan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     image_file = db.Column(db.String(20), nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
